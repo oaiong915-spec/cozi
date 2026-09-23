@@ -170,6 +170,21 @@ button,input{font:inherit;}
 .subimg-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;}
 .subimg{aspect-ratio:1/1;}
 
+.outfit-section{margin-bottom:22px;}
+.outfit-section .glabel-b{display:block; margin-bottom:8px;}
+.outfitbox{aspect-ratio:3/4; min-height:360px;}
+
+.wide-features{
+  width:100%;
+  margin-top:30px;
+}
+.wide-features .section{
+  width:100%;
+  margin-bottom:30px;
+}
+.wide-features .list-row input{
+  width:100%;
+}
 .section{margin-bottom:24px;}
 .section h4{font-size:13.5px; font-weight:700; margin:0 0 4px; color:var(--ink);}
 .list{margin-top:4px;}
@@ -188,8 +203,22 @@ button,input{font:inherit;}
 }
 .list-row input::placeholder{color:var(--placeholder); opacity:1;}
 
-.bottom-row{display:flex; align-items:flex-start; gap:28px; margin-top:6px;}
-.expr-group{display:flex; flex-direction:column; gap:10px;}
+.bottom-row{display:flex; align-items:flex-end; gap:18px; margin-top:6px;}
+.expr-group{display:flex; flex-direction:column; gap:10px; flex-shrink:0;}
+.expr-note-group{display:flex; flex:1; min-width:0; flex-direction:column; gap:10px;}
+.expr-note{
+  width:100%;
+  min-width:0;
+  border:none;
+  border-bottom:1px solid var(--line);
+  background:transparent;
+  outline:none;
+  color:var(--ink);
+  font-size:14px;
+  padding:0 2px 9px;
+}
+.expr-note::placeholder{color:var(--placeholder); opacity:1;}
+.expr-note:focus{border-bottom-color:var(--ink);}
 .glabel-b{font-size:13.5px; font-weight:700;}
 .expr-face{
   width:96px;
@@ -235,6 +264,9 @@ button,input{font:inherit;}
   .name-input{width:100%; font-size:29px;}
   .sub-input{width:100%; flex-basis:100%;}
   .color-cluster{margin-left:0; width:100%; gap:12px;}
+  .bottom-row{align-items:flex-end; gap:14px;}
+  .expr-face{width:88px; height:88px; font-size:40px;}
+  .outfitbox{min-height:320px;}
   .img-change{display:none;}
 }
 
@@ -295,6 +327,11 @@ button,input{font:inherit;}
           <span class="glabel-b">표정</span>
           <button class="expr-face" id="exprFace" type="button" title="클릭해서 표정 변경" aria-label="표정 변경">🙂</button>
         </div>
+        <div class="expr-note-group">
+          <label class="glabel-b" for="expressionNote">표정 설명 <span style="font-weight:400;color:var(--muted);">(선택)</span></label>
+          <input class="expr-note" id="expressionNote" data-save-text
+                 placeholder="예: 살짝 웃는 표정, 눈은 반쯤 감기" autocomplete="off">
+        </div>
       </div>
     </div>
 
@@ -321,6 +358,23 @@ button,input{font:inherit;}
         </div>
       </div>
 
+      <div class="outfit-section">
+        <span class="glabel-b">의상</span>
+        <div class="imgbox outfitbox" data-image-box data-image-key="outfit">
+          <input type="file" id="outfitFile" accept="image/*">
+          <label class="img-picker" for="outfitFile" tabindex="0">
+            <span class="img-placeholder">의상 사진 첨부</span>
+            <img alt="의상 참고 이미지">
+            <span class="img-change">클릭해서 변경</span>
+          </label>
+          <button class="img-remove" type="button" aria-label="의상 이미지 삭제" title="이미지 삭제">×</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wide-features">
       <div class="section">
         <h4>절대 빠지면 안 되는 특징</h4>
         <div class="list" data-list="must">
@@ -342,7 +396,6 @@ button,input{font:inherit;}
           <div class="list-row"><span class="num">5</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
         </div>
       </div>
-    </div>
   </div>
 
   <div class="utility-row">
@@ -355,7 +408,7 @@ button,input{font:inherit;}
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'character-reference-sheet-v4';
+  const STORAGE_KEY = 'character-reference-sheet-v5';
   const faces = ['🙂','😊','😄','😳','😢','😠','😐','😉'];
   const textInputs = [...document.querySelectorAll('[data-save-text]')];
   const colorInputs = [...document.querySelectorAll('input[type="color"][data-color-key]')];
