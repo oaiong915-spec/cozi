@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>캐릭터 레퍼런스 시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111111;
+  --muted:#8A8A8A;
+  --line:#E3E3E3;
+  --box:#D9D9D9;
+  --placeholder:#BFBFBF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:#FFFFFF;
+  color:var(--ink);
+  font-family:'Noto Sans KR',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  padding:44px 20px 70px;
+}
+button,input{font:inherit;}
+.sheet{max-width:880px; margin:0 auto;}
+
+.head{display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:28px;}
+.name-input{
+  font-weight:900;
+  font-size:32px;
+  border:none;
+  border-bottom:2px solid var(--ink);
+  background:transparent;
+  outline:none;
+  padding:0 2px 6px;
+  width:240px;
+  max-width:100%;
+  color:var(--ink);
+}
+.sub-input{
+  border:none;
+  border-bottom:1px solid var(--line);
+  background:transparent;
+  outline:none;
+  color:var(--muted);
+  font-size:14px;
+  padding:0 2px 8px;
+  flex:1;
+  min-width:160px;
+}
+.name-input::placeholder,.sub-input::placeholder{color:var(--placeholder); opacity:1;}
+.name-input:focus,.sub-input:focus{border-bottom-color:var(--ink);}
+
+.color-cluster{margin-left:auto; display:flex; gap:14px; flex-wrap:wrap;}
+.color-cluster .swatch-group{display:flex; flex-direction:column; align-items:center; gap:6px;}
+.color-cluster .glabel{font-size:11px; color:var(--muted); white-space:nowrap;}
+.color-cluster .sq{
+  width:40px;
+  height:40px;
+  background:var(--box);
+  position:relative;
+  cursor:pointer;
+  overflow:hidden;
+  outline-offset:3px;
+}
+.color-cluster .sq:focus-within{outline:2px solid var(--ink);}
+.color-cluster .sq input{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:pointer;
+  border:0;
+  padding:0;
+}
+
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:28px;}
+
+.imgbox{
+  background:var(--box);
+  position:relative;
+  overflow:hidden;
+  color:#fff;
+  font-size:13px;
+}
+.imgbox input[type="file"]{display:none;}
+.img-picker{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  outline:none;
+}
+.img-picker:focus-visible{outline:3px solid var(--ink); outline-offset:-3px;}
+.img-placeholder{pointer-events:none;}
+.imgbox img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:none;
+  background:var(--box);
+  pointer-events:none;
+}
+.imgbox.has-image img{display:block;}
+.imgbox.has-image .img-placeholder{display:none;}
+.img-change{
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  transform:translate(-50%,6px);
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(0,0,0,.58);
+  color:#fff;
+  font-size:11px;
+  line-height:1;
+  white-space:nowrap;
+  opacity:0;
+  transition:opacity .15s ease, transform .15s ease;
+  pointer-events:none;
+}
+.imgbox.has-image:hover .img-change,
+.imgbox.has-image .img-picker:focus-visible .img-change{opacity:1; transform:translate(-50%,0);}
+.img-remove{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:3;
+  width:28px;
+  height:28px;
+  border:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.58);
+  color:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+  padding:0 0 2px;
+}
+.imgbox.has-image .img-remove{display:flex;}
+.img-remove:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+.imgbox.dragover::after{
+  content:'여기에 놓아주세요';
+  position:absolute;
+  inset:0;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.50);
+  color:#fff;
+  font-weight:700;
+  pointer-events:none;
+}
+.portrait{aspect-ratio:3/4; margin-bottom:20px;}
+.subimg-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;}
+.subimg{aspect-ratio:1/1;}
+
+.section{margin-bottom:24px;}
+.section h4{font-size:13.5px; font-weight:700; margin:0 0 4px; color:var(--ink);}
+.list{margin-top:4px;}
+.list-row{display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); padding:9px 0;}
+.list-row:focus-within{border-bottom-color:#B5B5B5;}
+.list-row .num{font-size:12px; color:var(--muted); width:14px; flex-shrink:0;}
+.list-row input{
+  flex:1;
+  min-width:0;
+  border:none;
+  background:transparent;
+  outline:none;
+  font-family:inherit;
+  font-size:14px;
+  color:var(--ink);
+}
+.list-row input::placeholder{color:var(--placeholder); opacity:1;}
+
+.bottom-row{display:flex; align-items:flex-start; gap:28px; margin-top:6px;}
+.expr-group{display:flex; flex-direction:column; gap:10px;}
+.glabel-b{font-size:13.5px; font-weight:700;}
+.expr-face{
+  width:96px;
+  height:96px;
+  border:0;
+  background:var(--box);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:44px;
+  user-select:none;
+  padding:0;
+}
+.expr-face:focus-visible{outline:3px solid var(--ink); outline-offset:3px;}
+
+.utility-row{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:12px;
+  margin-top:20px;
+  min-height:28px;
+}
+.save-status{font-size:11px; color:var(--muted);}
+.reset-btn{
+  border:0;
+  background:transparent;
+  padding:5px 0;
+  color:var(--muted);
+  font-size:11px;
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.reset-btn:hover{color:var(--ink);}
+.reset-btn:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
+
+@media (max-width:680px){
+  body{padding:30px 16px 56px;}
+  .grid{grid-template-columns:1fr; gap:24px;}
+  .head{gap:14px;}
+  .name-input{width:100%; font-size:29px;}
+  .sub-input{width:100%; flex-basis:100%;}
+  .color-cluster{margin-left:0; width:100%; gap:12px;}
+  .img-change{display:none;}
+}
+
+@media print{
+  body{padding:0;}
+  .utility-row,.img-remove,.img-change{display:none !important;}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="head">
+    <input class="name-input" id="characterName" data-save-text placeholder="캐릭터 이름" autocomplete="off">
+    <input class="sub-input" id="characterAlias" data-save-text placeholder="(혹은 A캐릭터, 왼쪽 캐릭터 등)" autocomplete="off">
+
+    <div class="color-cluster" aria-label="캐릭터 색상">
+      <div class="swatch-group">
+        <label class="sq" title="기타 색상 선택"><input type="color" data-color-key="etc" value="#d9d9d9" aria-label="기타 색상"></label>
+        <span class="glabel">기타</span>
+      </div>
+      <div class="swatch-group">
+        <label class="sq" title="머리 밑색 선택"><input type="color" data-color-key="hairBase" value="#d9d9d9" aria-label="머리 밑색"></label>
+        <span class="glabel">머리(밑)</span>
+      </div>
+      <div class="swatch-group">
+        <label class="sq" title="머리 끝색 선택"><input type="color" data-color-key="hairTip" value="#d9d9d9" aria-label="머리 끝색"></label>
+        <span class="glabel">머리(끝)</span>
+      </div>
+      <div class="swatch-group">
+        <label class="sq" title="왼쪽 눈 색상 선택"><input type="color" data-color-key="eyeLeft" value="#d9d9d9" aria-label="왼쪽 눈 색상"></label>
+        <span class="glabel">눈(왼쪽)</span>
+      </div>
+      <div class="swatch-group">
+        <label class="sq" title="오른쪽 눈 색상 선택"><input type="color" data-color-key="eyeRight" value="#d9d9d9" aria-label="오른쪽 눈 색상"></label>
+        <span class="glabel">눈(오른쪽)</span>
+      </div>
+      <div class="swatch-group">
+        <label class="sq" title="피부색 선택"><input type="color" data-color-key="skin" value="#d9d9d9" aria-label="피부색"></label>
+        <span class="glabel">피부</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="imgbox portrait" data-image-box data-image-key="portrait">
+        <input type="file" id="portraitFile" accept="image/*">
+        <label class="img-picker" for="portraitFile" tabindex="0">
+          <span class="img-placeholder">사진 첨부</span>
+          <img alt="메인 캐릭터 참고 이미지">
+          <span class="img-change">클릭해서 변경</span>
+        </label>
+        <button class="img-remove" type="button" aria-label="메인 이미지 삭제" title="이미지 삭제">×</button>
+      </div>
+
+      <div class="bottom-row">
+        <div class="expr-group">
+          <span class="glabel-b">표정</span>
+          <button class="expr-face" id="exprFace" type="button" title="클릭해서 표정 변경" aria-label="표정 변경">🙂</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="subimg-row">
+        <div class="imgbox subimg" data-image-box data-image-key="sub1">
+          <input type="file" id="subFile1" accept="image/*">
+          <label class="img-picker" for="subFile1" tabindex="0">
+            <span class="img-placeholder">사진 첨부</span>
+            <img alt="추가 참고 이미지 1">
+            <span class="img-change">클릭해서 변경</span>
+          </label>
+          <button class="img-remove" type="button" aria-label="추가 이미지 1 삭제" title="이미지 삭제">×</button>
+        </div>
+
+        <div class="imgbox subimg" data-image-box data-image-key="sub2">
+          <input type="file" id="subFile2" accept="image/*">
+          <label class="img-picker" for="subFile2" tabindex="0">
+            <span class="img-placeholder">사진 첨부</span>
+            <img alt="추가 참고 이미지 2">
+            <span class="img-change">클릭해서 변경</span>
+          </label>
+          <button class="img-remove" type="button" aria-label="추가 이미지 2 삭제" title="이미지 삭제">×</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>절대 빠지면 안 되는 특징</h4>
+        <div class="list" data-list="must">
+          <div class="list-row"><span class="num">1</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">2</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">3</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">4</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">5</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>특징</h4>
+        <div class="list" data-list="feature">
+          <div class="list-row"><span class="num">1</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">2</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">3</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">4</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+          <div class="list-row"><span class="num">5</span><input data-save-text placeholder="특징을 입력해주세요" autocomplete="off"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="utility-row">
+    <span class="save-status" id="saveStatus" aria-live="polite">자동저장 준비됨</span>
+    <button class="reset-btn" id="resetBtn" type="button">전체 초기화</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'character-reference-sheet-v4';
+  const faces = ['🙂','😊','😄','😳','😢','😠','😐','😉'];
+  const textInputs = [...document.querySelectorAll('[data-save-text]')];
+  const colorInputs = [...document.querySelectorAll('input[type="color"][data-color-key]')];
+  const imageBoxes = [...document.querySelectorAll('[data-image-box]')];
+  const exprFace = document.getElementById('exprFace');
+  const saveStatus = document.getElementById('saveStatus');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let faceIndex = 0;
+  let imageData = {};
+  let saveTimer = null;
+  let storageAvailable = true;
+
+  const setStatus = (message) => {
+    saveStatus.textContent = message;
+  };
+
+  const updateSwatch = (input) => {
+    input.closest('.sq').style.backgroundColor = input.value;
+  };
+
+  const setImagePreview = (box, dataUrl) => {
+    const img = box.querySelector('img');
+    const key = box.dataset.imageKey;
+
+    if (dataUrl) {
+      img.src = dataUrl;
+      box.classList.add('has-image');
+      imageData[key] = dataUrl;
+    } else {
+      img.removeAttribute('src');
+      box.classList.remove('has-image');
+      delete imageData[key];
+      const input = box.querySelector('input[type="file"]');
+      input.value = '';
+    }
+  };
+
+  const readState = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      storageAvailable = false;
+      setStatus('자동저장 제한됨');
+      return null;
+    }
+  };
+
+  const buildState = (includeImages = true) => ({
+    texts: textInputs.map(input => input.value),
+    colors: Object.fromEntries(colorInputs.map(input => [input.dataset.colorKey, input.value])),
+    faceIndex,
+    images: includeImages ? imageData : {}
+  });
+
+  const saveState = () => {
+    if (!storageAvailable) return;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildState(true)));
+      setStatus('자동저장됨');
+    } catch (error) {
+      // 이미지 용량 때문에 저장공간이 부족할 경우 텍스트/색상/표정은 계속 저장한다.
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildState(false)));
+        setStatus('내용 저장됨 · 이미지는 현재 화면에서만 유지');
+      } catch (fallbackError) {
+        storageAvailable = false;
+        setStatus('자동저장 제한됨');
+      }
+    }
+  };
+
+  const queueSave = () => {
+    clearTimeout(saveTimer);
+    setStatus('저장 중…');
+    saveTimer = setTimeout(saveState, 180);
+  };
+
+  const restoreState = () => {
+    const state = readState();
+    if (!state) {
+      colorInputs.forEach(updateSwatch);
+      setStatus(storageAvailable ? '자동저장 준비됨' : '자동저장 제한됨');
+      return;
+    }
+
+    if (Array.isArray(state.texts)) {
+      textInputs.forEach((input, index) => {
+        if (typeof state.texts[index] === 'string') input.value = state.texts[index];
+      });
+    }
+
+    if (state.colors && typeof state.colors === 'object') {
+      colorInputs.forEach(input => {
+        const saved = state.colors[input.dataset.colorKey];
+        if (typeof saved === 'string' && /^#[0-9a-f]{6}$/i.test(saved)) input.value = saved;
+        updateSwatch(input);
+      });
+    } else {
+      colorInputs.forEach(updateSwatch);
+    }
+
+    if (Number.isInteger(state.faceIndex) && state.faceIndex >= 0 && state.faceIndex < faces.length) {
+      faceIndex = state.faceIndex;
+      exprFace.textContent = faces[faceIndex];
+    }
+
+    if (state.images && typeof state.images === 'object') {
+      imageBoxes.forEach(box => {
+        const saved = state.images[box.dataset.imageKey];
+        if (typeof saved === 'string' && saved.startsWith('data:image/')) {
+          setImagePreview(box, saved);
+        }
+      });
+    }
+
+    setStatus('이전 작성 내용 복원됨');
+  };
+
+  const compressImage = (file) => new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      reject(new Error('이미지 파일이 아닙니다.'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('파일을 읽지 못했습니다.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('이미지를 불러오지 못했습니다.'));
+      img.onload = () => {
+        const maxSide = 1400;
+        const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+        const width = Math.max(1, Math.round(img.naturalWidth * scale));
+        const height = Math.max(1, Math.round(img.naturalHeight * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/webp', 0.86));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const applyFile = async (box, file) => {
+    try {
+      setStatus('이미지 처리 중…');
+      const dataUrl = await compressImage(file);
+      setImagePreview(box, dataUrl);
+      queueSave();
+    } catch (error) {
+      setStatus(error.message || '이미지를 불러오지 못했습니다.');
+    }
+  };
+
+  textInputs.forEach(input => {
+    input.addEventListener('input', queueSave);
+  });
+
+  colorInputs.forEach(input => {
+    updateSwatch(input);
+    input.addEventListener('input', () => {
+      updateSwatch(input);
+      queueSave();
+    });
+  });
+
+  exprFace.addEventListener('click', () => {
+    faceIndex = (faceIndex + 1) % faces.length;
+    exprFace.textContent = faces[faceIndex];
+    queueSave();
+  });
+
+  imageBoxes.forEach(box => {
+    const input = box.querySelector('input[type="file"]');
+    const picker = box.querySelector('.img-picker');
+    const remove = box.querySelector('.img-remove');
+
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (file) applyFile(box, file);
+    });
+
+    picker.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        input.click();
+      }
+    });
+
+    remove.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setImagePreview(box, '');
+      queueSave();
+    });
+
+    ['dragenter', 'dragover'].forEach(type => {
+      box.addEventListener(type, event => {
+        event.preventDefault();
+        box.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(type => {
+      box.addEventListener(type, event => {
+        event.preventDefault();
+        box.classList.remove('dragover');
+      });
+    });
+
+    box.addEventListener('drop', event => {
+      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (file) applyFile(box, file);
+    });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    const ok = window.confirm('작성한 내용과 첨부 이미지를 모두 초기화할까요?');
+    if (!ok) return;
+
+    textInputs.forEach(input => { input.value = ''; });
+    colorInputs.forEach(input => {
+      input.value = '#d9d9d9';
+      updateSwatch(input);
+    });
+    faceIndex = 0;
+    exprFace.textContent = faces[0];
+    imageData = {};
+    imageBoxes.forEach(box => setImagePreview(box, ''));
+
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      storageAvailable = true;
+      setStatus('초기화됨');
+    } catch (error) {
+      setStatus('초기화됨 · 자동저장 제한됨');
+    }
+  });
+
+  restoreState();
+})();
+</script>
+</body>
+</html>
