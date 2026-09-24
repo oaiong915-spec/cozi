@@ -22,13 +22,64 @@
 html{-webkit-text-size-adjust:100%;}
 body{
   margin:0;
-  background:#FFFFFF;
+  background:#ECECEC;
   color:var(--ink);
   font-family:'Noto Sans KR',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  padding:44px 20px 70px;
+  padding:24px 18px 48px;
+  overflow-x:auto;
 }
 button,input{font:inherit;}
-.sheet{max-width:880px; margin:0 auto;}
+.export-frame{
+  display:inline-block;
+  padding:34px 18px 18px;
+  background:#ECECEC;
+  border-radius:28px;
+}
+.sheet{
+  width:960px;
+  max-width:none;
+  margin:0 auto;
+  background:#FFFFFF;
+  border:1px solid #E2E2E2;
+  border-radius:20px;
+  box-shadow:0 12px 34px rgba(0,0,0,.08);
+  padding:48px 32px 34px;
+  overflow:visible;
+}
+.topbar{
+  width:960px;
+  max-width:none;
+  margin:0 auto 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.topbar-info{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.topbar-title{font-size:15px; font-weight:900; line-height:1.35;}
+.topbar-help{font-size:12px; color:var(--muted); line-height:1.5;}
+.topbar-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.action-btn{
+  border:1px solid #cfcfcf;
+  background:#fff;
+  color:var(--ink);
+  padding:9px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.action-btn.primary{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+.save-status-top{font-size:12px; color:var(--muted);}
 
 .head{display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:28px;}
 .name-input{
@@ -262,27 +313,51 @@ button,input{font:inherit;}
 .reset-btn:hover{color:var(--ink);}
 .reset-btn:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
 
+@media (max-width:1000px){
+  body{padding:18px 14px 40px;}
+  .topbar{margin-left:0; margin-right:0;}
+  .sheet{margin-left:0; margin-right:0;}
+}
 @media (max-width:680px){
-  body{padding:30px 16px 56px;}
-  .grid{grid-template-columns:1fr; gap:24px;}
-  .head{gap:14px;}
-  .name-input{width:100%; font-size:29px;}
-  .sub-input{width:100%; flex-basis:100%;}
-  .color-cluster{margin-left:0; width:100%; gap:12px;}
-  .bottom-row{align-items:flex-end; gap:14px;}
-  .expr-face{width:88px; height:88px; font-size:40px;}
-  .outfitbox{min-height:320px;}
   .img-change{display:none;}
 }
 
 @media print{
-  body{padding:0;}
+  body{padding:0; background:#fff;}
+  .topbar{display:none !important;}
+  .sheet{box-shadow:none; border:0; border-radius:0; margin:0;}
   .utility-row,.img-remove,.img-change{display:none !important;}
 }
 </style>
+.capture-static{
+  box-sizing:border-box;
+  white-space:pre-wrap;
+  overflow:visible;
+}
+.capture-static.board-name,
+.capture-static.name-input,
+.capture-static.sub-input{
+  display:flex;
+  align-items:center;
+}
+.capture-static.board-name{
+  justify-content:center;
+}
+
 </head>
 <body>
-<div class="sheet">
+<div class="topbar">
+  <div class="topbar-info">
+    <div class="topbar-title">개인 커미션 자료 시트</div>
+    <div class="topbar-help">작성 후 PNG로 저장 버튼을 눌러 한 장 이미지로 저장할 수 있어요.</div>
+  </div>
+  <div class="topbar-actions">
+    <span class="save-status-top" id="saveStatusTop" aria-live="polite">자동저장 준비됨</span>
+    <button class="action-btn primary" id="exportBtn" type="button">PNG로 저장</button>
+  </div>
+</div>
+
+<div class="export-frame" id="captureFrame"><div class="sheet" id="captureSheet">
   <div class="head">
     <input class="name-input" id="characterName" data-save-text placeholder="캐릭터 이름" autocomplete="off">
     <input class="sub-input" id="characterAlias" data-save-text placeholder="(혹은 A캐릭터, 왼쪽 캐릭터 등)" autocomplete="off">
@@ -407,20 +482,25 @@ button,input{font:inherit;}
     <span class="save-status" id="saveStatus" aria-live="polite">자동저장 준비됨</span>
     <button class="reset-btn" id="resetBtn" type="button">전체 초기화</button>
   </div>
-</div>
+</div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'character-reference-sheet-v8';
+  const STORAGE_KEY = 'character-reference-sheet-v13';
   const faces = ['🙂','😊','😄','😳','😢','😠','😐','😉'];
   const textInputs = [...document.querySelectorAll('[data-save-text]')];
   const colorInputs = [...document.querySelectorAll('input[type="color"][data-color-key]')];
   const imageBoxes = [...document.querySelectorAll('[data-image-box]')];
   const exprFace = document.getElementById('exprFace');
   const saveStatus = document.getElementById('saveStatus');
+  const saveStatusTop = document.getElementById('saveStatusTop');
   const resetBtn = document.getElementById('resetBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const captureSheet = document.getElementById('captureSheet');
+  const captureFrame = document.getElementById('captureFrame');
 
   let faceIndex = 0;
   let imageData = {};
@@ -428,7 +508,8 @@ button,input{font:inherit;}
   let storageAvailable = true;
 
   const setStatus = (message) => {
-    saveStatus.textContent = message;
+    if (saveStatus) saveStatus.textContent = message;
+    if (saveStatusTop) saveStatusTop.textContent = message;
   };
 
   const updateSwatch = (input) => {
@@ -663,6 +744,106 @@ button,input{font:inherit;}
       setStatus('초기화됨');
     } catch (error) {
       setStatus('초기화됨 · 자동저장 제한됨');
+    }
+  });
+
+
+  exportBtn.addEventListener('click', async () => {
+    if (typeof html2canvas === 'undefined') {
+      alert('이미지 저장 기능을 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    setStatus('PNG 생성 중…');
+    exportBtn.disabled = true;
+    const originalText = exportBtn.textContent;
+    exportBtn.textContent = '저장 중…';
+
+    try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      const exportWidth = Math.ceil(captureFrame.scrollWidth);
+      const exportHeight = Math.ceil(captureFrame.scrollHeight);
+
+      const canvas = await html2canvas(captureFrame, {
+        backgroundColor: '#ECECEC',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: exportWidth,
+        height: exportHeight,
+        windowWidth: exportWidth + 120,
+        windowHeight: exportHeight + 120,
+        scrollX: 0,
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          const clonedFrame = clonedDoc.getElementById('captureFrame');
+          const clonedSheet = clonedDoc.getElementById('captureSheet');
+
+          if (clonedFrame) {
+            clonedFrame.style.display = 'inline-block';
+            clonedFrame.style.padding = '40px 18px 18px';
+            clonedFrame.style.background = '#ECECEC';
+            clonedFrame.style.borderRadius = '28px';
+            clonedFrame.style.margin = '0';
+          }
+
+          if (clonedSheet) {
+            clonedSheet.style.width = '960px';
+            clonedSheet.style.maxWidth = 'none';
+            clonedSheet.style.height = 'auto';
+            clonedSheet.style.overflow = 'visible';
+            clonedSheet.style.margin = '0';
+            clonedSheet.style.paddingTop = '52px';
+          }
+
+          const clonedBody = clonedDoc.body;
+          if (clonedBody) {
+            clonedBody.style.margin = '0';
+            clonedBody.style.padding = '0';
+            clonedBody.style.background = '#ECECEC';
+            clonedBody.style.width = `${exportWidth + 40}px`;
+            clonedBody.style.overflow = 'visible';
+          }
+
+          clonedDoc.querySelectorAll('.topbar, .utility-row, .img-remove, .img-change').forEach(el => {
+            el.style.display = 'none';
+          });
+
+          // html2canvas의 input 한글 렌더링 잘림을 피하기 위해 저장용 복제본에서는
+          // 제목/보조 입력칸을 일반 div 텍스트로 바꾼다.
+          clonedDoc.querySelectorAll('.name-input, .sub-input').forEach(input => {
+            const div = clonedDoc.createElement('div');
+            div.className = `${input.className} capture-static`;
+            div.textContent = input.value || input.placeholder || '';
+            div.style.lineHeight = input.classList.contains('name-input') ? '1.32' : '1.3';
+            div.style.paddingTop = '8px';
+            div.style.paddingBottom = '8px';
+            div.style.minHeight = input.classList.contains('name-input') ? '54px' : '40px';
+            div.style.overflow = 'visible';
+            input.replaceWith(div);
+          });
+        }
+      });
+
+      const rawName = (document.getElementById('characterName')?.value || 'commission-reference-sheet').trim();
+      const safeName = rawName.replace(/[\\/:*?"<>|]/g, '_') || 'commission-reference-sheet';
+
+      const link = document.createElement('a');
+      link.download = `${safeName}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      setStatus('PNG 저장 완료');
+    } catch (error) {
+      console.error(error);
+      setStatus('PNG 저장 실패');
+      alert('이미지 저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = originalText;
     }
   });
 
