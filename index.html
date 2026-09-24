@@ -112,6 +112,11 @@ button,input{font:inherit;}
   background:var(--box);
   pointer-events:none;
 }
+.imgbox.has-image{
+  aspect-ratio:var(--image-ratio, auto);
+  min-height:0;
+  align-self:start;
+}
 .imgbox.has-image img{display:block;}
 .imgbox.has-image .img-placeholder{display:none;}
 .img-change{
@@ -167,7 +172,7 @@ button,input{font:inherit;}
   pointer-events:none;
 }
 .portrait{aspect-ratio:3/4; margin-bottom:20px;}
-.subimg-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;}
+.subimg-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; align-items:start;}
 .subimg{aspect-ratio:1/1;}
 
 .outfit-section{margin-bottom:22px;}
@@ -408,7 +413,7 @@ button,input{font:inherit;}
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'character-reference-sheet-v5';
+  const STORAGE_KEY = 'character-reference-sheet-v8';
   const faces = ['🙂','😊','😄','😳','😢','😠','😐','😉'];
   const textInputs = [...document.querySelectorAll('[data-save-text]')];
   const colorInputs = [...document.querySelectorAll('input[type="color"][data-color-key]')];
@@ -435,12 +440,19 @@ button,input{font:inherit;}
     const key = box.dataset.imageKey;
 
     if (dataUrl) {
+      img.onload = () => {
+        if (img.naturalWidth && img.naturalHeight) {
+          box.style.setProperty('--image-ratio', `${img.naturalWidth} / ${img.naturalHeight}`);
+        }
+      };
       img.src = dataUrl;
       box.classList.add('has-image');
       imageData[key] = dataUrl;
     } else {
+      img.onload = null;
       img.removeAttribute('src');
       box.classList.remove('has-image');
+      box.style.removeProperty('--image-ratio');
       delete imageData[key];
       const input = box.querySelector('input[type="file"]');
       input.value = '';
